@@ -1,21 +1,6 @@
 from flask import Flask,render_template,request
-"""
-  Que tal uma conexão com o MySQL usando SQLAlchemy?
-  https://www.sqlalchemy.org/
-  
-  passo 1 - pip install flask_sqlalchemy
-  passo 2 - importar no arquivo inicio.py
-"""
+
 from flask_sqlalchemy import SQLAlchemy
-
-"""
-passo 3 - instalar o sqlalchemy
-passo 4 - importar recursos do módulo sql alchemy
-"""
-
-# Importa o pymysql
-
-
 
 # Importa a função `sessionmaker`, que é usada para criar uma nova sessão para interagir com o banco de dados
 from sqlalchemy.orm import sessionmaker
@@ -66,16 +51,12 @@ metadata.reflect(engine)
 Base = automap_base(metadata=metadata)
 Base.prepare()
 
-# Acessando a tabela 'vitorias' mapeada
+# Acessando a tabela 'aluno' mapeada
 Aluno = Base.classes.aluno
-
-
 
 # Criar a sessão do SQLAlchemy
 Session = sessionmaker(bind=engine)
 session = Session()
-
-
 
 @app.route('/alomundo')
 def ola():
@@ -108,9 +89,24 @@ def criar():
     nome = request.form['nome']
     tempoestudo = int(request.form['tempoestudo'])
     rendafamiliar = float(request.form['rendafamiliar'])
+
+     # Verifica se o RA já existe no banco de dados
+    aluno_existente = session.query(Aluno).filter_by(ra=ra).first()
+
+    if aluno_existente:
+        mensagem = "RA já cadastrado no sistema."
+        return render_template('index.html', msgbanco=mensagem)
+
     aluno = Aluno(ra=ra,nome=nome,tempoestudo=tempoestudo,rendafamiliar=rendafamiliar)
-    session.add(aluno)
-    session.commit()
+    
+    try:
+      session.add(aluno) #  Adiciona um novo objeto aluno à sessão para ser inserido no banco de dados.
+      session.commit() # Confirma a transação, salvando as mudanças no banco de dados.
+    except:
+      session.rollback() # Desfaz qualquer mudança feita na sessão durante a transação, revertendo o banco de dados ao estado anterior.
+      raise # Relevanta a exceção original, permitindo que seja tratada em outro nível do código ou exibida como um erro
+    finally:
+       session.close() # Fecha a sessão, garantindo que os recursos sejam liberados, independentemente de a transação ter sido bem-sucedida ou não.
     mensagem = "cadastro efetuado com sucesso"
     return render_template('index.html',msgbanco=mensagem)
 
