@@ -110,4 +110,23 @@ def criar():
     mensagem = "cadastro efetuado com sucesso"
     return render_template('index.html',msgbanco=mensagem)
 
+
+@app.route('/alunos', methods=['GET'])
+def listar_alunos():
+    try:
+        # Busca todos os alunos cadastrados no banco de dados
+        alunos = session.query(Aluno).all()
+    except:
+        session.rollback()
+        mensagem = "Erro ao tentar recuperar a lista de alunos."
+        return render_template('index.html', msgbanco=mensagem)
+    finally:
+        session.close()
+
+    # Renderiza o template HTML passando a lista de alunos
+    return render_template('lista_alunos.html', alunos=alunos)
+
+
+
+
 app.run(debug=True)
