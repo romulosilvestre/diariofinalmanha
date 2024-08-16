@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,redirect,url_for,flash
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -107,8 +107,8 @@ def criar():
       raise # Relevanta a exceção original, permitindo que seja tratada em outro nível do código ou exibida como um erro
     finally:
        session.close() # Fecha a sessão, garantindo que os recursos sejam liberados, independentemente de a transação ter sido bem-sucedida ou não.
-    mensagem = "cadastro efetuado com sucesso"
-    return render_template('index.html',msgbanco=mensagem)
+ 
+    return redirect(url_for('listar_alunos'))
 
 
 @app.route('/alunos', methods=['GET'])
